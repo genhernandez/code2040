@@ -1,0 +1,63 @@
+#!/usr/bin/env python
+import requests
+import json
+
+token = "e74c552d10618f0f6c4517a71a440a4b"
+github = 'https://github.com/genhernandez/code2040'
+
+def challenge_one():
+	requests.post('http://challenge.code2040.org/api/register')
+
+def challenge_two():
+    d = post_token('http://challenge.code2040.org/api/reverse').text
+    string = d[::-1]
+
+    validate_answer("reverse", 'string', string)
+
+def challenge_three():
+    d = post_token('http://challenge.code2040.org/api/haystack').json()
+    haystack = d["haystack"]
+    needle = d["needle"]
+    index = haystack.index(needle)
+
+    validate_answer("haystack", 'needle', index)
+
+def challenge_four():
+    d = post_token('http://challenge.code2040.org/api/prefix').json()
+    prefix = d["prefix"]
+    given_array = d["array"]
+    array = []
+
+    for item in given_array:
+        if not item.startswith(prefix):
+            array.append(str(item))
+
+    url = "http://challenge.code2040.org/api/prefix/validate"
+    data = {'token':token, 'array':array}
+    requests.post(url, json = data)
+
+from datetime import datetime, timedelta
+def challenge_five():
+    d = post_token('http://challenge.code2040.org/api/dating').json()
+    datestamp = d["datestamp"]
+    interval = d["interval"]
+
+    parsed_time = datetime.strptime(datestamp, '%Y-%m-%dT%H:%M:%SZ')
+    new_time = parsed_time + timedelta(seconds=interval)
+    new_formatted_time = new_time.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+    validate_answer("dating", 'datestamp', new_formatted_time)
+
+def post_token(url):
+    return requests.post(url, data = {'token':token})
+
+def validate_answer(url_keyword, key, answer):
+    url = "http://challenge.code2040.org/api/%s/validate" % url_keyword
+    data = {'token':token, key:answer}
+    requests.post(url, data = data)
+
+challenge_one()
+challenge_two()
+challenge_three()
+challenge_four()
+challenge_five()
